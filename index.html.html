@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bingo Game</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background-color: black;  /* black bgcolor for all pages. */
+    }
+    .cell {
+        width: 100px;
+        height: 80px;
+        border: 1px solid black;
+        display: inline-block;
+        margin: 2px;
+        font-size: 25px;
+        line-height: 70px;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 45px;
+    }
+    #allNumbers {
+        font-size: 67px;
+        border: 1px solid black;
+        justify-content: right;
+        background-color: aqua;
+        align-items: center;
+        margin: 5px;
+        border: palegreen;
+        border-collapse: collapse; /* This ensures that adjacent cells share borders */
+    border: 1px solid black;
+    }
+    #bingoimg {
+        margin-top: 10px;
+        margin-left: 100px;
+    }
+    #bingoCardIds {
+        font-size: 80px;
+        justify-content: right;
+        background-color:#fff;
+        align-items: center;
+        margin: 5px;
+        cursor: grab;
+    }
+    th {
+        background-color: SeaGreen;
+        border-radius: 10px;
+    }
+    td {
+        background-color: blue;
+        border-radius: 10px;
+    }
+    .card-id {
+        font-size: inherit;
+    }
+    .called {
+        background-color: blue;
+        color: white;
+    }
+    .winning-line {
+        background-color: yellow;
+        color: black;
+    }
+    #board {
+        margin: 20px auto;
+        width: fit-content;
+        border: 1px solid black;
+        padding: 10px;
+        background-color: white;
+    }
+    #ballsContainer {
+        margin-top: 20px;
+    }
+    .ball {
+        width: 50px;
+        height: 50px;
+        background-color: #ffcc00;
+        border-radius: 50%;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        margin: 5px;
+        font-size: 20px;
+        color: #fff;
+    }
+    #currentCall {
+        width: 170px;
+        height: 160px;
+        background-color: #ffcc00;
+        border-radius: 50%;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        margin: 5px;
+        font-size: 70px;
+        font-weight: bold;
+        color: red;
+        background-image: url('img/yegna.JPG');
+        background-size: 80%;
+        background-position: center;
+    }
+    #winnerAmount {
+        width: 170px;
+        height: 160px;
+        background-color: black;
+        border-radius: 50%;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        margin: 5px;
+        font-size: 50px;
+        font-weight: bold;
+        color: white;
+        background-position: center;
+    }
+    #lastFiveCalled {
+    margin-top: 10px;
+}
+
+.last-five-number {
+    display: inline-block;
+    width: 80px;
+    height: 40px;
+    
+    background-color: #ffcc00; /* Change background color as desired */
+   align-items: center;
+    margin-right: 5px;
+    color: red;
+    font-size: 30px;
+    justify-content: center;
+    font-weight: bold;
+}
+
+    #btnDrawBall, #btnResetGame, #btnCheckWinner, #btnStartGame, #btnClearBoard {
+        font-size: 30px;
+        font-weight: bold;
+        color: white;
+        border-color: black;
+        border-radius: 5px;
+        background-color: seagreen;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 5px;
+    }
+    #btnStartGame:hover, #btnDrawBall:hover, #btnResetGame:hover, #btnCheckWinner:hover {
+        background-color: white;
+        color: blue;
+    }
+    #btnResetGame:hover {
+        color: red;
+    }
+    #ballBirr {
+        font-size: 30px;
+        font-weight: bold;
+        color: seagreen;
+        border-color: red;
+        border-radius: 5px;
+    }
+    #boardButtons {
+        margin-top: 10px;
+    }
+    #btnCloseBoard, #btnLockBoard {
+        font-size: 20px;
+        font-weight: bold;
+        color: white;
+        background-color: seagreen;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 5px;
+    }
+    #btnCloseBoard:hover {
+        background-color: darkgreen;
+    }
+    #btnLockBoard:hover {
+        background-color: red;
+    }
+
+    #btnClearBoard:hover {
+        background-color: red;
+    }
+    .blink-blue {
+        animation:3s;
+        color: blue !important;
+    }
+    .blink-yellow{
+        animation: blink-blue-animation 0.5s;
+        color:yellow !important;
+    }
+    @keyframes blink-blue-animation {
+        50% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+        }
+    }
+</style>
+</head>
+<body>
+    <div id="gameTitleSection">
+        <h1>የኛ ቢንጎ</h1>
+    </div>
+
+    <audio id="audio1" src="s/b1.M4A"></audio>
+    <audio id="audio2" src="s/b2.M4A"></audio>
+    <!-- Add more <audio> elements for other sound files as needed -->
+        
+    <table id="bingoCardIds" >
+        <thead>
+            <tr>
+                <th>የተጫዋቾች ካርቴላ ቁጥር</th>
+            </tr>
+        </thead>
+        <tbody font-size="65px">
+            <!-- Bingo card IDs will be dynamically added here -->
+        </tbody>
+    </table>
+    <div id="betSection">
+        <label for="betAmount">Select Bet Amount:</label>
+        <select id="betAmount">
+            <option value="25">25</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="35">35</option>
+            <option value="50">50</option>
+        </select>
+    </div>
+    <button id="btnStartGame" style="display:none;">Start Game</button> &nbsp; <button id="btnClearBoard">Clear Board</button>
+
+    
+    
+    <div id="gameArea" style="display:none;">
+        
+        <dv align="right">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <img  id="bingoimg" src="img/bingo.JPG" alt="image "  width="90" hight="85"></a> 
+        
+        <table id="allNumbers" align="right">
+            <tbody>
+                <!-- Numbers will be dynamically added here -->
+            </tbody>
+        </table>
+        </dv>
+        
+        
+        <div id="check" align="center">
+            
+        </div>
+
+        <div id="board"></div>
+        <div id="boardButtons" style="display:none;">
+            <button id="btnCloseBoard">Close Board</button>
+            <button id="btnLockBoard">Lock Board</button>
+        </div>
+        <div id="ballsContainer"></div>
+        <table id="ballBirr">
+           <tr>
+             <td>
+                 <div id="currentCall" ></div>
+             </td> 
+          
+            
+            <td >
+                <label for="cardId">Enter Card ID:</label>
+            <input type="text" id="cardId">
+            <button id="btnCheckWinner">Check </button>
+          
+           
+            <button id="btnDrawBall">Start New Game</button>
+            <button id="btnResetGame">Reset Game</button>
+       </td>
+       <td>
+        <div id="winnerAmount"></div>
+   </td>
+           </tr>
+           
+        </table>
+        <div id="lastFiveCalled"></div>
+        
+    </div>
+
+    <script>
+        let bingoCardIds = [];
+        let selectedCardIds = []; // Array to store selected bingo card IDs
+        let calledNumbers = [];
+
+        function generateBingoCardIds() {
+            const tableBody = document.querySelector('#bingoCardIds tbody');
+            const customCardConfigurations = [
+            { cardId: 1, cells: [['15', '16', '39', '59', '66'], ['11', '28', '40', '51', '68'], ['12', '20', 'F', '56', '67'], ['3', '30', '35', '60', '72'], ['10', '24', '37', '53', '64']] },
+                { cardId: 2, cells: [['5', '21', '35', '46', '69'], ['15', '20', '42', '51', '70'], ['10', '28', 'F', '47', '67'], ['2', '26', '31', '49', '64'], ['6', '27', '33', '52', '65']] },
+                { cardId: 3, cells: [['14', '23', '40', '58', '62'], ['13', '25', '32', '46', '65'], ['3', '28', 'F', '50', '63'], ['6', '16', '36', '48', '72'], ['12', '20', '45', '52', '61']] },
+                { cardId: 4, cells: [['1', '19', '41', '49', '72'], ['5', '26', '36', '50', '69'], ['6', '29', 'F', '60', '61'], ['14', '25', '42', '47', '71'], ['2', '24', '45', '54', '65']] },
+        { cardId: 5, cells: [['2', '16', '43', '47', '70'], ['4', '23', '32', '58', '73'], ['9', '17', 'F', '51', '74'], ['1', '26', '34', '59', '75'], ['14', '20', '31', '57', '72']] },
+        { cardId: 6, cells: [['3', '28', '42', '46', '70'], ['15', '18', '36', '53', '64'], ['14', '20', 'F', '55', '67'], ['6', '21', '45', '57', '73'], ['11', '30', '41', '60', '62']] },
+        { cardId: 7, cells: [['15', '28', '39', '58', '65'], ['10', '19', '34', '54', '68'], ['3', '17', 'F', '59', '71'], ['9', '16', '45', '51', '66'], ['14', '24', '36', '49', '64']] },
+        { cardId: 8, cells: [['7', '20', '32', '47', '61'], ['13', '19', '36', '53', '67'], ['9', '21', 'F', '57', '66'], ['4', '18', '38', '59', '68'], ['2', '27', '45', '51', '69']] },
+        { cardId: 9, cells: [['5', '26', '33', '56', '75'], ['2', '18', '39', '54', '62'], ['1', '29', 'F', '58', '72'], ['9', '22', '44', '57', '68'], ['13', '17', '42', '55', '67']] },
+        { cardId: 10, cells: [['1', '20', '34', '58', '75'], ['13', '18', '40', '59', '69'], ['6', '27', 'F', '52', '67'], ['7', '23', '37', '48', '70'], ['2', '29', '44', '57', '73']] },
+        { cardId: 11, cells: [['11', '21', '44', '49', '64'], ['4', '28', '34', '55', '62'], ['2', '26', 'F', '47', '71'], ['14', '29', '41', '48', '73'], ['5', '24', '31', '51', '63']] },
+        { cardId: 12, cells: [['9', '20', '35', '59', '66'], ['1', '26', '43', '56', '72'], ['6', '16', 'F', '58', '64'], ['12', '22', '41', '49', '61'], ['2', '18', '38', '51', '69']] },
+        { cardId: 13, cells: [['11', '16', '45', '60', '73'], ['1', '6', '44', '55', '69'], ['4', '29', 'F', '47', '72'], ['9', '28', '31', '51', '64'], ['14', '23', '40', '59', '68']] },
+        { cardId: 14, cells: [['5', '18', '45', '58', '67'], ['1', '27', '42', '50', '65'], ['7', '28', 'F', '54', '64'], ['2', '21', '43', '60', '74'], ['10', '24', '32', '51', '71']] },
+        { cardId: 15, cells: [['5', '30', '38', '48', '71'], ['1', '22', '42', '60', '62'], ['2', '18', 'F', '50', '65'], ['3', '29', '33', '46', '75'], ['12', '17', '32', '55', '66']] },
+        { cardId: 16, cells: [['7', '23', '45', '55', '62'], ['3', '27', '42', '60', '71'], ['12', '21', 'F', '57', '66'], ['4', '24', '41', '49', '68'], ['13', '17', '44', '50', '75']] },
+        { cardId: 17, cells: [['10', '28', '32', '59', '72'], ['3', '27', '40', '47', '653'], ['13', '24', 'F', '57', '71'], ['2', '21', '41', '60', '68'], ['7', '25', '42', '58', '65']] },
+        { cardId: 18, cells: [['13', '27', '33', '51', '63'], ['7', '22', '42', '48', '61'], ['10', '25', 'F', '54', '65'], ['8', '16', '43', '52', '72'], ['14', '23', '38', '60', '74']] },
+        { cardId: 19, cells: [['1', '22', '39', '51', '62'], ['15', '25', '35', '47', '75'], ['3', '23', 'F', '50', '66'], ['8', '26', '44', '49', '70'], ['4', '28', '38', '53', '67']] },
+        { cardId: 20, cells: [['9', '19', '35', '54', '73'], ['8', '23', '43', '57', '61'], ['4', '24', 'F', '58', '68'], ['11', '17', '32', '50', '62'], ['1', '26', '38', '49', '75']] },
+        { cardId: 21, cells: [['8', '18', '39', '54', '63'], ['2', '30', '37', '57', '75'], ['13', '29', 'F', '56', '68'], ['15', '27', '31', '49', '67'], ['6', '17', '45', '52', '61']] },
+        { cardId: 22, cells: [['6', '26', '44', '55', '62'], ['13', '19', '32', '60', '61'], ['9', '25', 'F', '49', '75'], ['3', '20', '40', '46', '65'], ['8', '27', '31', '56', '71']] },
+        { cardId: 23, cells: [['1', '27', '40', '54', '73'], ['4', '17', '33', '46', '68'], ['7', '16', 'F', '48', '63'], ['9', '23', '36', '56', '66'], ['11', '21', '34', '50', '74']] },
+        { cardId: 24, cells: [['9', '19', '40', '46', '75'], ['8', '26', '31', '48', '67'], ['1', '24', 'F', '59', '65'], ['7', '20', '39', '49', '70'], ['12', '27', '43', '57', '73']] },
+        { cardId: 25, cells: [['3', '23', '40', '53', '75'], ['1', '27', '45', '51', '68'], ['4', '28', 'F', '46', '73'], ['14', '29', '35', '56', '61'], ['9', '30', '41', '52', '74']] },
+        { cardId: 26, cells: [['10', '25', '37', '53', '65'], ['14', '29', '38', '58', '69'], ['2', '28', 'F', '56', '68'], ['6', '22', '35', '57', '70'], ['3', '18', '45', '60', '67']] },
+        { cardId: 27, cells: [['11', '26', '39', '51', '75'], ['3', '28', '33', '56', '67'], ['10', '24', 'F', '58', '74'], ['7', '18', '45', '53', '69'], ['13', '30', '44', '47', '64']] },
+        { cardId: 28, cells: [['8', '17', '42', '52', '74'], ['2', '24', '39', '56', '63'], ['14', '16', 'F', '60', '62'], ['9', '21', '31', '47', '72'], ['15', '18', '35', '54', '70']] },
+        { cardId: 29, cells: [['14', '16', '32', '53', '74'], ['15', '21', '34', '59', '65'], ['10', '26', 'F', '55', '66'], ['2', '19', '45', '56', '61'], ['1', '25', '40', '51', '64']] },
+        { cardId: 30, cells: [['8', '27', '44', '54', '70'], ['11', '26', '31', '55', '64'], ['9', '19', 'F', '57', '67'], ['6', '23', '41', '49', '62'], ['13', '22', '40', '56', '72']] },
+        { cardId: 31, cells: [['3', '27', '31', '46', '71'], ['9', '2', '40', '48', '67'], ['5', '17', 'F', '55', '62'], ['12', '18', '38', '58', '68'], ['4', '25', '36', '54', '73']] },
+        { cardId: 32, cells: [['10', '20', '32', '58', '73'], ['15', '28', '34', '56', '61'], ['9', '24', 'F', '50', '75'], ['5', '25', '37', '46', '67'], ['14', '23', '31', '51', '65']] },
+        { cardId: 33, cells: [['7', '29', '42', '56', '69'], ['15', '27', '40', '60', '64'], ['1', '18', 'F', '51', '74'], ['4', '16', '38', '57', '67'], ['8', '21', '39', '59', '68']] },
+        { cardId: 34, cells: [['4', '17', '31', '46', '70'], ['8', '29', '37', '57', '65'], ['9', '24', 'F', '59', '75'], ['11', '27', '34', '55', '63'], ['3', '22', '36', '48', '73']] },
+        { cardId: 35, cells: [['9', '17', '35', '55', '72'], ['14', '24', '45', '52', '68'], ['1', '18', 'F', '48', '66'], ['8', '21', '36', '47', '71'], ['4', '27', '37', '57', '70']] },
+        { cardId: 36, cells: [['2', '22', '41', '54', '62'], ['13', '21', '45', '51', '70'], ['15', '30', 'F', '47', '63'], ['4', '26', '39', '50', '75'], ['10', '29', '34', '58', '64']] },
+        { cardId: 37, cells: [['1', '21', '32', '54', '65'], ['5', '28', '42', '51', '63'], ['2', '26', 'F', '60', '61'], ['12', '24', '34', '59', '62'], ['15', '17', '43', '57', '72']] },
+        { cardId: 38, cells: [['1', '30', '45', '49', '66'], ['9', '24', '42', '56', '69'], ['7', '20', 'F', '52', '74'], ['12', '17', '36', '60', '62'], ['11', '18', '35', '54', '63']] },
+        { cardId: 39, cells: [['10', '27', '35', '51', '61'], ['14', '16', '37', '53', '72'], ['1', '25', 'F', '48', '69'], ['11', '26', '41', '58', '70'], ['13', '28', '42', '47', '68']] },
+        { cardId: 40, cells: [['14', '17', '34', '54', '63'], ['10', '28', '43', '55', '70'], ['7', '16', 'F', '58', '71'], ['15', '24', '41', '59', '69'], ['6', '29', '36', '57', '64']] },
+        { cardId: 41, cells: [['5', '18', '31', '52', '62'], ['10', '21', '43', '56', '66'], ['9', '28', 'F', '59', '69'], ['14', '25', '40', '48', '68'], ['6', '20', '35', '47', '71']] },
+        { cardId: 42, cells: [['11', '20', '43', '49', '75'], ['10', '25', '33', '58', '74'], ['15', '17', 'F', '50', '67'], ['13', '21', '42', '52', '71'], ['2', '23', '35', '51', '64']] },
+        { cardId: 43, cells: [['15', '18', '44', '54', '69'], ['6', '19', '31', '56', '64'], ['13', '16', 'F', '60', '70'], ['8', '27', '35', '55', '66'], ['7', '29', '38', '57', '72']] },
+        { cardId: 44, cells: [['11', '28', '35', '47', '72'], ['4', '26', '45', '48', '73'], ['14', '16', 'F', '54', '71'], ['8', '25', '33', '52', '61'], ['7', '22', '44', '57', '68']] },
+        { cardId: 45, cells: [['9', '27', '39', '48', '70'], ['6', '20', '38', '51', '63'], ['7', '19', 'F', '55', '68'], ['11', '22', '35', '46', '74'], ['8', '17', '45', '47', '69']] },
+        { cardId: 46, cells: [['5', '17', '43', '47', '74'], ['15', '18', '42', '48', '63'], ['11', '21', 'F', '56', '64'], ['4', '23', '39', '54', '66'], ['2', '25', '33', '49', '65']] },
+        { cardId: 47, cells: [['5', '17', '38', '46', '70'], ['6', '20', '43', '51', '75'], ['12', '25', 'F', '56', '61'], ['1', '16', '45', '60', '68'], ['4', '26', '35', '53', '74']] },
+        { cardId: 48, cells: [['4', '28', '37', '53', '61'], ['2', '19', '31', '49', '62'], ['7', '16', 'F', '56', '64'], ['14', '26', '39', '52', '74'], ['6', '18', '32', '57', '67']] },
+        { cardId: 49, cells: [['1', '21', '34', '52', '67'], ['3', '29', '41', '54', '69'], ['10', '24', 'F', '57', '70'], ['8', '26', '35', '53', '72'], ['6', '19', '31', '58', '64']] },
+        { cardId: 50, cells: [['3', '17', '36', '49', '69'], ['10', '30', '40', '52', '62'], ['14', '27', 'F', '58', '66'], ['2', '19', '41', '59', '68'], ['15', '18', '42', '47', '64']] },
+        { cardId: 51, cells: [['2', '21', '31', '49', '68'], ['12', '20', '45', '54', '69'], ['10', '27', 'F', '48', '75'], ['9', '16', '40', '46', '61'], ['14', '19', '39', '57', '62']] },
+        { cardId: 52, cells: [['10', '22', '36', '59', '74'], ['2', '21', '44', '55', '70'], ['11', '26', 'F', '48', '72'], ['15', '23', '40', '57', '75'], ['14', '18', '31', '58', '66']] },
+        { cardId: 53, cells: [['15', '30', '35', '59', '69'], ['5', '21', '45', '51', '71'], ['8', '25', 'F', '46', '67'], ['7', '23', '40', '58', '74'], ['11', '29', '42', '54', '72']] },
+        { cardId: 54, cells: [['1', '26', '34', '60', '61'], ['6', '18', '35', '52', '66'], ['4', '24', 'F', '50', '69'], ['15', '29', '32', '48', '63'], ['7', '25', '45', '53', '72']] },
+        { cardId: 55, cells: [['12', '24', '45', '51', '65'], ['8', '16', '42', '53', '62'], ['15', '19', 'F', '59', '64'], ['7', '25', '39', '56', '70'], ['14', '20', '32', '48', '74']] },
+        { cardId: 56, cells: [['13', '17', '44', '53', '68'], ['3', '30', '45', '56', '66'], ['15', '28', 'F', '55', '73'], ['12', '20', '33', '50', '70'], ['4', '24', '43', '52', '62']] },
+        { cardId: 57, cells: [['5', '28', '40', '56', '63'], ['12', '21', '36', '53', '73'], ['14', '16', 'F', '60', '68'], ['15', '25', '44', '58', '66'], ['11', '17', '45', '54', '64']] },
+        { cardId: 58, cells: [['1', '16', '32', '58', '74'], ['3', '28', '44', '60', '67'], ['9', '24', 'F', '49', '64'], ['10', '20', '37', '47', '71'], ['13', '19', '39', '46', '61']] },
+        { cardId: 59, cells: [['7', '20', '34', '47', '70'], ['2', '24', '43', '55', '73'], ['3', '29', 'F', '46', '62'], ['12', '18', '45', '49', '69'], ['5', '17', '33', '57', '64']] },
+        { cardId:60, cells: [['14', '2', '41', '48', '75'], ['9', '17', '34', '51', '62'], ['1', '30', 'F', '60', '65'], ['13', '28', '38', '49', '73'], ['6', '22', '40', '54', '61']] },
+        { cardId: 61, cells: [['', '', '', '', ''], ['', '', '', '', ''], ['', '', 'F', '', ''], ['', '', '', '', ''], ['', '', '', '', '']] },
+        { cardId: 62, cells: [['', '', '', '', ''], ['', '', '', '', ''], ['', '', 'F', '', ''], ['', '', '', '', ''], ['', '', '', '', '']] },
+        { cardId: 63, cells: [['', '', '', '', ''], ['', '', '', '', ''], ['', '', 'F', '', ''], ['', '', '', '', ''], ['', '', '', '', '']] },
+        { cardId: 64, cells: [['', '', '', '', ''], ['', '', '', '', ''], ['', '', 'F', '', ''], ['', '', '', '', ''], ['', '', '', '', '']] },
+        { cardId: 65, cells: [['', '', '', '', ''], ['', '', '', '', ''], ['', '', 'F', '', ''], ['', '', '', '', ''], ['', '', '', '', '']] },
+        { cardId: 66, cells: [['', '', '', '', ''], ['', '', '', '', ''], ['', '', 'F', '', ''], ['', '', '', '', ''], ['', '', '', '', '']] },
+        { cardId: 67, cells: [['', '', '', '', ''], ['', '', '', '', ''], ['', '', 'F', '', ''], ['', '', '', '', ''], ['', '', '', '', '']] },
+        { cardId: 68, cells: [['', '', '', '', ''], ['', '', '', '', ''], ['', '', 'F', '', ''], ['', '', '', '', ''], ['', '', '', '', '']] },
+        { cardId: 69, cells: [['', '', '', '', ''], ['', '', '', '', ''], ['', '', 'F', '', ''], ['', '', '', '', ''], ['', '', '', '', '']] },
+        { cardId: 70, cells: [['', '', '', '', ''], ['', '', '', '', ''], ['', '', 'F', '', ''], ['', '', '', '', ''], ['', '', '', '', '']] }
+
+
+            ];
+
+            customCardConfigurations.forEach(config => {
+                const { cardId } = config;
+
+                  // Create row for the card ID only
+                const row = document.createElement('th');
+                const button = document.createElement('button');
+                button.textContent = cardId;
+                button.classList.add('card-id');
+                button.dataset.cardId = cardId;
+                row.appendChild(button);
+                tableBody.appendChild(row).style.display = 'inline-block';
+                
+
+                bingoCardIds.push({ id: cardId, cells: config.cells });
+            });
+        }
+
+        function displayBingoCard(cells) {
+    const board = document.getElementById('board');
+    board.innerHTML = '';
+    board.style.display = 'block'; // Ensure the board is visible
+
+    cells.forEach(row => {
+        const rowElement = document.createElement('div');
+        row.forEach(cell => {
+            const cellElement = document.createElement('div');
+            cellElement.classList.add('cell');
+            cellElement.textContent = cell;
+            if (calledNumbers.includes(cell)) {
+                cellElement.classList.add('called');
+            }
+            rowElement.appendChild(cellElement);
+        });
+        board.appendChild(rowElement);
+    });
+
+    // Display the board buttons
+    document.getElementById('boardButtons').style.display = 'block';
+}
+        function checkWinningLine(cells) {
+    const winningLine = {
+        isWinning: false,
+        cells: []
+    };
+
+    cells.forEach(row => {
+        if (row.every(cell => calledNumbers.includes(cell) || cell === 'F')) {
+            winningLine.isWinning = true;
+            winningLine.cells.push(...row);
+        }
+    });
+
+    for (let col = 0; col < cells[0].length; col++) {
+        let column = [];
+        for (let row = 0; row < cells.length; row++) {
+            column.push(cells[row][col]);
+        }
+        if (column.every(cell => calledNumbers.includes(cell) || cell === 'F')) {
+            winningLine.isWinning = true;
+            winningLine.cells.push(...column);
+        }
+    }
+
+    let diagonal1 = [];
+    let diagonal2 = [];
+    for (let i = 0; i < cells.length; i++) {
+        diagonal1.push(cells[i][i]);
+        diagonal2.push(cells[i][cells.length - i - 1]);
+    }
+    if (diagonal1.every(cell => calledNumbers.includes(cell) || cell === 'F')) {
+        winningLine.isWinning = true;
+        winningLine.cells.push(...diagonal1);
+    }
+    if (diagonal2.every(cell => calledNumbers.includes(cell) || cell === 'F')) {
+        winningLine.isWinning = true;
+        winningLine.cells.push(...diagonal2);
+    }
+
+    
+
+    return winningLine;
+}
+
+
+function updateBingoCardDisplay(cells) {
+    const board = document.getElementById('board');
+    board.innerHTML = '';
+    board.style.display = 'block'; // Ensure the board is visible
+
+    const winningLine = checkWinningLine(cells);
+
+    cells.forEach(row => {
+        const rowElement = document.createElement('div');
+        row.forEach(cell => {
+            const cellElement = document.createElement('div');
+            cellElement.classList.add('cell');
+            cellElement.textContent = cell;
+            if (winningLine.cells.includes(cell)) {
+                cellElement.classList.add('winning-line');
+            } else if (calledNumbers.includes(cell)) {
+                cellElement.classList.add('called');
+            }
+            rowElement.appendChild(cellElement);
+        });
+        board.appendChild(rowElement);
+    });
+
+    // Display the board buttons
+    document.getElementById('boardButtons').style.display = 'block';
+}
+
+        function calculateWinnings() {
+        const betAmount = parseInt(document.getElementById('betAmount').value, 10);
+        const selectedPlayers = selectedCardIds.length;
+        const winnings = betAmount * selectedPlayers - selectedPlayers * 5;
+
+        const winnerAmount = document.getElementById('winnerAmount');
+        if (winnings > 0) {
+            winnerAmount.textContent = `ደራሸ: ${winnings} ብር`;
+        } else {
+            winnerAmount.textContent = 'No Winnings';
+        }
+    }
+    function checkWinner() {
+    const cardIdInput = document.getElementById('cardId').value.trim();
+    const cardId = parseInt(cardIdInput);
+
+    if (!cardId || isNaN(cardId)) {
+        alert('Please enter a valid card ID.');
+        document.getElementById('cardId').value = ''; // Clear the card ID input field
+        return;
+    }
+
+    if (lockedCardId === cardId) {
+        alert('The board is locked for this card ID. Reset the game to check again.');
+        document.getElementById('cardId').value = ''; // Clear the card ID input field
+        return;
+    }
+
+    if (!selectedCardIds.includes(cardId)) {
+        alert('The card ID is not registered.');
+        document.getElementById('cardId').value = ''; // Clear the card ID input field
+        return;
+    }
+
+    const matchingCard = bingoCardIds.find(card => card.id === cardId);
+    if (!matchingCard) {
+        alert('No bingo card found with the entered ID.');
+        document.getElementById('cardId').value = ''; // Clear the card ID input field
+        return;
+    }
+
+    updateBingoCardDisplay(matchingCard.cells);
+    document.getElementById('board').scrollIntoView({ behavior: 'smooth' });
+
+    // Clear the card ID input field
+  //  document.getElementById('cardId').value = '';
+}
+
+
+
+
+function closeBoard() {
+    const board = document.getElementById('board');
+    board.style.display = 'none';
+
+    // Hide the board buttons
+    document.getElementById('boardButtons').style.display = 'none';
+    document.getElementById('cardId').value = '';
+
+}
+function clearBoard() {
+    selectedCardIds = []; // Clear the selected card IDs
+    const cardIdButtons = document.querySelectorAll('.card-id');
+    cardIdButtons.forEach(button => {
+        button.style.backgroundColor = ''; // Reset the background color
+    });
+    displayStartGameButton(); // Update the visibility of the Start Game button
+}
+
+document.getElementById('btnClearBoard').addEventListener('click', clearBoard);
+
+function lockBoard() {
+    const boardButtons = document.getElementById('boardButtons');
+    const cells = document.querySelectorAll('#board .cell');
+
+    // Disable further changes by locking the board
+    cells.forEach(cell => {
+        cell.style.pointerEvents = 'none';
+    });
+
+    // Optionally change the style to indicate the board is locked
+    cells.forEach(cell => {
+        cell.style.backgroundColor = 'lightgray';
+    });
+
+    // Hide the lock button after locking
+    boardButtons.style.display = 'none';
+    document.getElementById('cardId').value = '';
+
+}
+
+let lockedCardId = null;
+
+function lockBoard() {
+    const cardIdInput = document.getElementById('cardId').value.trim();
+    const cardId = parseInt(cardIdInput);
+
+    if (!cardId || isNaN(cardId)) {
+        alert('Please enter a valid card ID.');
+        return;
+    }
+
+    if (!selectedCardIds.includes(cardId)) {
+        alert('The card ID is not registered.');
+        return;
+    }
+
+    lockedCardId = cardId; // Set the locked card ID
+
+    const boardButtons = document.getElementById('boardButtons');
+    const cells = document.querySelectorAll('#board .cell');
+
+    // Disable further changes by locking the board
+    cells.forEach(cell => {
+        cell.style.pointerEvents = 'none';
+    });
+
+    // Optionally change the style to indicate the board is locked
+    cells.forEach(cell => {
+        cell.style.backgroundColor = 'lightgray';
+    });
+
+    // Hide the lock button after locking
+    boardButtons.style.display = 'none';
+    document.getElementById('cardId').value = '';
+
+    // Hide or remove the board after a delay
+    setTimeout(() => {
+        const board = document.getElementById('board');
+        board.style.display = 'none';
+    }, 2000); // Adjust the delay time as needed
+}
+
+
+
+
+        function generateAllNumbersTable() {
+            const tableBody = document.querySelector('#allNumbers tbody');
+            let number = 1;
+            for (let row = 1; row <= 5; row++) {
+                const tr = document.createElement('tr');
+                for (let col = 1; col <= 15; col++) {
+                    const td = document.createElement('td');
+                    td.classList.add('number-cell');
+                    td.textContent = number;
+                    if (calledNumbers.includes(number.toString())) {
+                        td.classList.add('called');
+                    }
+                    tr.appendChild(td);
+                    number++;
+                }
+                tableBody.appendChild(tr);
+            }
+            calculateWinnings();
+        }
+  
+        function drawBall() {
+    const maxNumber = 75;
+    let drawnNumber;
+    do {
+        drawnNumber = Math.floor(Math.random() * maxNumber) + 1;
+    } while (calledNumbers.includes(drawnNumber.toString()));
+
+    calledNumbers.push(drawnNumber.toString());
+
+    let letter;
+    if (drawnNumber >= 1 && drawnNumber <= 15) {
+        letter = 'B';
+    } else if (drawnNumber >= 16 && drawnNumber <= 30) {
+        letter = 'I';
+    } else if (drawnNumber >= 31 && drawnNumber <= 45) {
+        letter = 'N';
+    } else if (drawnNumber >= 46 && drawnNumber <= 60) {
+        letter = 'G';
+    } else if (drawnNumber >= 61 && drawnNumber <= 75) {
+        letter = 'O';
+    }
+
+    playSound(drawnNumber);
+
+    const ball = document.createElement('div');
+    ball.classList.add('ball');
+
+    const currentCall = document.getElementById('currentCall');
+    currentCall.textContent = ' ' + letter + ' - ' + drawnNumber;
+    currentCall.style.backgroundImage = 'none'; // Remove background image
+
+    const lastFiveCalledDiv = document.getElementById('lastFiveCalled');
+    const lastFiveCalled = calledNumbers.slice(-5).map(number => {
+        const numLetter = determineLetter(number);
+        return `<div class="last-five-number">${numLetter}${number}</div>`;
+    });
+    lastFiveCalledDiv.innerHTML = 'Last five called numbers: ' + lastFiveCalled.join('');
+
+    
+
+    // Update the last called number
+    lastCalledNumber = drawnNumber;
+
+    updateAllNumbersTable();
+    calculateWinnings();
+
+// Change the button text to "Call Next Number"
+const btnDrawBall = document.getElementById('btnDrawBall');
+    btnDrawBall.textContent = 'Call Next Number';
+
+    // Clear the card ID input field
+    document.getElementById('cardId').value = '';
+    cell.classList.remove('blink-blue');
+}
+
+        function updateAllNumbersTable() {
+    const cells = document.querySelectorAll('#allNumbers .number-cell');
+    cells.forEach(cell => {
+        const number = parseInt(cell.textContent);
+        if (calledNumbers.includes(number.toString())) {
+            cell.classList.add('blink-yellow');
+            cell.classList.add('called');
+            setTimeout(() => {
+                cell.classList.remove('blink-blue');
+            }, 5); // Duration of the blinking effect (here, it's set to 0.5 seconds)
+        }
+    });
+   
+           }
+
+
+
+        function determineLetter(number) {
+            if (number >= 1 && number <= 15) {
+                return 'B';
+            } else if (number >= 16 && number <= 30) {
+                return 'I';
+            } else if (number >= 31 && number <= 45) {
+                return 'N';
+            } else if (number >= 46 && number <= 60) {
+                return 'G';
+            } else if (number >= 61 && number <= 75) {
+                return 'O';
+            }
+        }
+
+        function handleCardSelection() {
+            const cardIdButtons = document.querySelectorAll('.card-id');
+            cardIdButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const cardId = parseInt(button.getAttribute('data-card-id'));
+                    if (!selectedCardIds.includes(cardId)) {
+                        selectedCardIds.push(cardId);
+                        button.style.backgroundColor = 'red';
+                        
+                    } else {
+                        selectedCardIds = selectedCardIds.filter(id => id !== cardId);
+                        button.style.backgroundColor = '';
+                    }
+                    displayStartGameButton(); // Add this line to display the Start Game button after marking a card ID
+                    displayClearBoardButton();
+                });
+            });
+        }
+
+        function displayStartGameButton() {
+            const startGameButton = document.getElementById('btnStartGame');
+            if (selectedCardIds.length >= 2) {
+                startGameButton.style.display = 'inline-block';
+            } else {
+                startGameButton.style.display = 'none';
+            }
+        }
+
+        function displayClearBoardButton() {
+            const clearbooardButton = document.getElementById('btnClearBoard');
+            if (selectedCardIds.length >= 1) {
+                clearbooardButton.style.display = 'inline-block';
+            } else {
+                clearbooardButton.style.display = 'none';
+            }
+        }
+
+        function playSound(number) {
+            let audioElement;
+
+            switch (number) {
+                case 1:
+                    audioElement = document.getElementById('audio1');
+                    break;
+                case 2:
+                    audioElement = document.getElementById('audio2');
+                    break;
+                default:
+                    return;
+            }
+
+            if (audioElement) {
+                audioElement.play();
+            }
+        }
+
+        function startGame() {
+    document.getElementById('bingoCardIds').style.display = 'none';
+    document.getElementById('btnStartGame').style.display = 'none';
+    document.getElementById('betSection').style.display = 'none';
+    document.getElementById('gameArea').style.display = 'block';
+    document.getElementById('btnClearBoard').style.display = 'none';
+    
+    // Clear any existing content in the game area
+    clearGameArea();
+
+    // Hide the game title section
+    document.getElementById('gameTitleSection').style.display = 'none';
+
+    // Generate all necessary content for the game area
+    generateAllNumbersTable();
+}
+
+function clearGameArea() {
+    // Clear existing content in the game area
+    const tableBody = document.querySelector('#allNumbers tbody');
+    tableBody.innerHTML = '';
+    document.getElementById('currentCall').textContent = '';
+    document.getElementById('lastFiveCalled').textContent = '';
+    document.getElementById('winnerAmount').textContent = '';
+    const board = document.getElementById('board');
+    board.style.display = 'none';
+}
+
+
+        function resetGame() {
+            lockedCardId = null; // Reset the locked card ID
+    calledNumbers = [];
+    // Do not reset selectedCardIds
+    document.getElementById('bingoCardIds').style.display = 'block';
+    document.getElementById('btnStartGame').style.display = 'none';
+    document.getElementById('gameArea').style.display = 'none';
+    document.getElementById('cardId').value = '';
+    document.getElementById('winnerAmount').textContent = '';
+    const tableBody = document.querySelector('#allNumbers tbody');
+    tableBody.innerHTML = '';
+    document.getElementById('board').innerHTML = '';
+    document.getElementById('currentCall').textContent = '';
+    document.getElementById('lastFiveCalled').textContent = '';
+    document.getElementById('cardId').value = '';
+    displayStartGameButton(); // Display the Start Game button after resetting the game
+}
+
+
+        document.getElementById('btnCheckWinner').addEventListener('click', checkWinner);
+        document.getElementById('btnDrawBall').addEventListener('click', drawBall);
+        document.getElementById('btnResetGame').addEventListener('click', resetGame);
+        document.getElementById('btnStartGame').addEventListener('click', startGame);
+        document.getElementById('btnCloseBoard').addEventListener('click', closeBoard);
+        document.getElementById('btnLockBoard').addEventListener('click', lockBoard);
+
+
+        window.addEventListener('load', () => {
+            generateBingoCardIds();
+            handleCardSelection();
+        });
+    </script>
+</body>
+</html>
+
